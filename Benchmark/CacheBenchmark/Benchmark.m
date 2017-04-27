@@ -81,6 +81,7 @@
 + (void)memoryCacheBenchmark {
 //    1.27  1.09
 //    2.86  5.57
+    return;
     NSMutableDictionary *nsDict = [NSMutableDictionary new];
     YYThreadSafeDictionary *nsDictLock = [YYThreadSafeDictionary new];
     NSCache *ns = [NSCache new];
@@ -498,7 +499,6 @@
 + (void)diskCacheWriteSmallDataBenchmark {
     NSString *basePath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask, YES) firstObject];
     basePath = [basePath stringByAppendingPathComponent:@"FileCacheBenchmarkSmall"];
-    
     YYKVStorage *yykvFile = [[YYKVStorage alloc] initWithPath:[basePath stringByAppendingPathComponent:@"yykvFile"] type:YYKVStorageTypeFile];
     YYKVStorage *yykvSQLite = [[YYKVStorage alloc] initWithPath:[basePath stringByAppendingPathComponent:@"yykvSQLite"] type:YYKVStorageTypeSQLite];
     YYDiskCache *yy = [[YYDiskCache alloc] initWithPath:[basePath stringByAppendingPathComponent:@"yy"]];

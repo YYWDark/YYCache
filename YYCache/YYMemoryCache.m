@@ -324,7 +324,6 @@ static inline dispatch_queue_t YYMemoryCacheGetReleaseQueue() {
     pthread_mutex_init(&_lock, NULL);
     _lru = [_YYLinkedMap new];
     _queue = dispatch_queue_create("com.ibireme.cache.memory", DISPATCH_QUEUE_SERIAL);
-    
     _countLimit = NSUIntegerMax;
     _costLimit = NSUIntegerMax;
     _ageLimit = DBL_MAX;
@@ -417,14 +416,17 @@ static inline dispatch_queue_t YYMemoryCacheGetReleaseQueue() {
         return;
     }
     pthread_mutex_lock(&_lock);
+    //查找是否存在对应该key的节点
     _YYLinkedMapNode *node = CFDictionaryGetValue(_lru->_dic, (__bridge const void *)(key));
     NSTimeInterval now = CACurrentMediaTime();
     if (node) {
+        //修改相应的数据
         _lru->_totalCost -= node->_cost;
         _lru->_totalCost += cost;
         node->_cost = cost;
         node->_time = now;
         node->_value = object;
+        //根据LRU算法原理，将访问的点移到最前面
         [_lru bringNodeToHead:node];
     } else {
         node = [_YYLinkedMapNode new];
@@ -432,14 +434,19 @@ static inline dispatch_queue_t YYMemoryCacheGetReleaseQueue() {
         node->_time = now;
         node->_key = key;
         node->_value = object;
+        //在链表头插入结点
         [_lru insertNodeAtHead:node];
     }
+     //判断链表的消耗的总资源是否大于设置的最大值
     if (_lru->_totalCost > _costLimit) {
+        //移除链表最后的节点
         dispatch_async(_queue, ^{
             [self trimToCost:_costLimit];
         });
     }
+    //判断链表的总持有节点是否大于该缓存设置的最大持有数
     if (_lru->_totalCount > _countLimit) {
+        //移除链表最后的节点
         _YYLinkedMapNode *node = [_lru removeTailNode];
         if (_lru->_releaseAsynchronously) {
             dispatch_queue_t queue = _lru->_releaseOnMainThread ? dispatch_get_main_queue() : YYMemoryCacheGetReleaseQueue();

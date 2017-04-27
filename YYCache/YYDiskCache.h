@@ -176,8 +176,16 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable instancetype)initWithPath:(NSString *)path
                       inlineThreshold:(NSUInteger)threshold NS_DESIGNATED_INITIALIZER;
-
-
+/**
+NS_DESIGNATED_INITIALIZER关键字 意思是最终被指定的初始化方法，在interface只能用一次而且必须以init开头的方法。
+在m文件中，不管init或者其他的初始化方法都要调用上面的initWithTitle方法初始化
+ 
+ NS_DESIGNATED_INITIALIZER（特定构造方法）
+ 子类如果重写了父类的特定构造方法, 那么必须使用super调用父类的特定构造方法（不一定是同名的）
+ 
+ NS_REQUIRES_SUPER
+ 子类重写方法, 必须调用super父类的同名方法
+*/
 #pragma mark - Access Methods
 ///=============================================================================
 /// @name Access Methods

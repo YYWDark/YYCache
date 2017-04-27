@@ -43,6 +43,8 @@ NS_ASSUME_NONNULL_BEGIN
  
  See <http://www.sqlite.org/intern-v-extern-blob.html> for more information.
  */
+
+
 typedef NS_ENUM(NSUInteger, YYKVStorageType) {
     
     /// The `value` is stored as a file in file system.
@@ -88,6 +90,9 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
 ///=============================================================================
 /// @name Initializer
 ///=============================================================================
+/**
+ UNAVAILABLE_ATTRIBUTE 禁止通过下面两个方式实例化对象
+ */
 - (instancetype)init UNAVAILABLE_ATTRIBUTE;
 + (instancetype)new UNAVAILABLE_ATTRIBUTE;
 

@@ -226,9 +226,11 @@ static UIApplication *_YYSharedApplication() {
     if (!stmt) return NO;
     
     int timestamp = (int)time(NULL);
+    //sqlite3_bind_xxx函数给这条语句绑定参数
     sqlite3_bind_text(stmt, 1, key.UTF8String, -1, NULL);
     sqlite3_bind_text(stmt, 2, fileName.UTF8String, -1, NULL);
     sqlite3_bind_int(stmt, 3, (int)value.length);
+    //当fileName为空的时候存在数据库的是value.bytes，不然存的是NULl对象
     if (fileName.length == 0) {
         sqlite3_bind_blob(stmt, 4, value.bytes, (int)value.length, 0);
     } else {
@@ -237,7 +239,7 @@ static UIApplication *_YYSharedApplication() {
     sqlite3_bind_int(stmt, 5, timestamp);
     sqlite3_bind_int(stmt, 6, timestamp);
     sqlite3_bind_blob(stmt, 7, extendedData.bytes, (int)extendedData.length, 0);
-    
+    //通过sqlite3_step命令执行创建表的语句
     int result = sqlite3_step(stmt);
     if (result != SQLITE_DONE) {
         if (_errorLogsEnabled) NSLog(@"%s line:%d sqlite insert error (%d): %s", __FUNCTION__, __LINE__, result, sqlite3_errmsg(_db));
@@ -682,6 +684,7 @@ static UIApplication *_YYSharedApplication() {
         NSLog(@"YYKVStorage init error: invalid path: [%@].", path);
         return nil;
     }
+    
     if (type > YYKVStorageTypeMixed) {
         NSLog(@"YYKVStorage init error: invalid type: %lu.", (unsigned long)type);
         return nil;
@@ -696,6 +699,9 @@ static UIApplication *_YYSharedApplication() {
     _dbPath = [path stringByAppendingPathComponent:kDBFileName];
     _errorLogsEnabled = YES;
     NSError *error = nil;
+    
+    
+    //创建本地目录
     if (![[NSFileManager defaultManager] createDirectoryAtPath:path
                                    withIntermediateDirectories:YES
                                                     attributes:nil
@@ -749,10 +755,13 @@ static UIApplication *_YYSharedApplication() {
     }
     
     if (filename.length) {
+        //先储存在文件里面
         if (![self _fileWriteWithName:filename data:value]) {
             return NO;
         }
+        //储存在sql数据库,并不储存数据而是NULL对象。储存在数据库的原因是为了储存key 方便查找
         if (![self _dbSaveWithKey:key value:value fileName:filename extendedData:extendedData]) {
+            //储存数据库失败就删除之前储存的文件
             [self _fileDeleteWithName:filename];
             return NO;
         }
